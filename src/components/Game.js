@@ -3,7 +3,28 @@ import { useDocumentData } from 'react-firebase-hooks/firestore';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/firestore';
 
+import {createWorkerFactory, useWorker} from '@shopify/react-web-worker';
+const createWorker = createWorkerFactory(() => import('./worker'));
+
+
 const Game = ({ exitTheGame, db, auth, theGameID }) => {
+
+    const worker = useWorker(createWorker);
+    const [message, setMessage] = useState(null);
+
+    // useEffect(() => {
+    //     (async () => {
+    //       // Note: in your actual app code, make sure to check if Home
+    //       // is still mounted before setting state asynchronously!
+    //       const webWorkerMessage = await worker.hello('Tobi');
+    //       setMessage(webWorkerMessage);
+    //     })();
+    //   }, [worker]);
+    const callWorker = async () => {
+          const webWorkerMessage = await worker.hello('Tobi');
+          setMessage(webWorkerMessage);
+    }
+
 
     const [inputText, setInputText] = useState('');
     const gameDataRef = db.collection('gamesInProgress').doc(theGameID);
@@ -44,6 +65,10 @@ const Game = ({ exitTheGame, db, auth, theGameID }) => {
         </form>
 
         <span style={{ textAlign:'center' }}>- Chat -</span>
+
+        <button onClick={ callWorker }>Call Worker</button>
+
+        <span>{ message }</span>
 
         <div style={{ border: '1px solid teal', color:'whitesmoke', fontSize:'0.75em' }}>
             {/* { messages && messages.map( msg => { */}
